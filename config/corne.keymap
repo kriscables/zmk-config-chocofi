@@ -15,6 +15,8 @@
     };
 };
 
+&led_strip { chain-length = <8>; };
+
 / {
         keymap {
                 compatible = "zmk,keymap";
