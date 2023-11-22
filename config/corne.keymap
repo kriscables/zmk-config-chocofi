@@ -9,6 +9,12 @@
 #include <dt-bindings/zmk/bt.h>
 #include <dt-bindings/zmk/rgb.h>
 
+/ {
+    chosen {
+        zmk,underglow = &led_strip;
+    };
+};
+
 
 / {
         keymap {
