@@ -1,57 +1,115 @@
 /*
- * Copyright (c) 2020 The ZMK Contributors
- *
- * SPDX-License-Identifier: MIT
- */
+  * Copyright (c) 2020 The ZMK Contributors
+  *
+  * SPDX-License-Identifier: MIT
+  */
 
 #include <behaviors.dtsi>
-#include <dt-bindings/zmk/keys.h>
 #include <dt-bindings/zmk/bt.h>
-
+#include <dt-bindings/zmk/keys.h>
 
 / {
-        keymap {
-                compatible = "zmk,keymap";
+    behaviors {
+        // Custom mod-tap behavior with longer tapping term and quick tap
 
-                default_layer {
-// -----------------------------------------------------------------------------------------
-// |  TAB |  Q  |  W  |  E  |  R  |  T  |   |  Y  |  U   |  I  |  O  |  P  | BKSP |
-// | CTRL |  A  |  S  |  D  |  F  |  G  |   |  H  |  J   |  K  |  L  |  ;  |  '   |
-// | SHFT |  Z  |  X  |  C  |  V  |  B  |   |  N  |  M   |  ,  |  .  |  /  | ESC  |
-//                    | GUI | LWR | SPC |   | ENT | RSE  | ALT |
-                        bindings = <
-   &kp TAB   &kp Q &kp W &kp E &kp R &kp T   &kp Y &kp U  &kp I     &kp O   &kp P    &kp BSPC
-   &kp LCTRL &kp A &kp S &kp D &kp F &kp G   &kp H &kp J  &kp K     &kp L   &kp SEMI &kp SQT
-   &kp LSHFT &kp Z &kp X &kp C &kp V &kp B   &kp N &kp M  &kp COMMA &kp DOT &kp FSLH &kp ESC
-                  &kp LGUI &mo 1 &kp SPACE   &kp RET &mo 2 &kp RALT
-                        >;
-                };
-                lower_layer {
-// -----------------------------------------------------------------------------------------
-// |  TAB |  1  |  2  |  3  |  4  |  5  |   |  6  |  7  |  8  |  9  |  0  | BKSP |
-// | BTCLR| BT1 | BT2 | BT3 | BT4 | BT5 |   | LFT | DWN |  UP | RGT |     |      |
-// | SHFT |BTCLR|     |     |     |     |   |     |     |     |     |     |      |
-//                    | GUI |     | SPC |   | ENT |     | ALT |
-                        bindings = <
-   &kp TAB    &kp N1       &kp N2       &kp N3       &kp N4       &kp N5         &kp N6   &kp N7   &kp N8 &kp N9    &kp N0 &kp BSPC
-   &bt BT_CLR &bt BT_SEL 0 &bt BT_SEL 1 &bt BT_SEL 2 &bt BT_SEL 3 &bt BT_SEL 4   &kp LEFT &kp DOWN &kp UP &kp RIGHT &trans &trans
-   &kp LSHFT  &bt BT_CLR   &trans       &trans       &trans       &trans         &trans   &trans   &trans &trans    &trans &trans
-                          	        &kp LGUI     &trans       &kp SPACE      &kp RET  &trans   &kp RALT
-                        >;
-                };
-
-                raise_layer {
-// -----------------------------------------------------------------------------------------
-// |  TAB |  !  |  @  |  #  |  $  |  %  |   |  ^  |  &  |  *  |  (  |  )  | BKSP |
-// | CTRL |RGBEFF|RGBTOG|     |     |     |   |  -  |  =  |  [  |  ]  |  \  |  `   |
-// | SHFT |     |     |     |     |     |   |  _  |  +  |  {  |  }  | "|" |  ~   |
-//                    | GUI |     | SPC |   | ENT |     | ALT |
-                        bindings = <
-   &kp  TAB  &kp EXCL &kp AT &kp HASH &kp DLLR &kp PRCNT   &kp CARET &kp AMPS  &kp KP_MULTIPLY &kp LPAR &kp RPAR &kp BSPC
-   &kp LCTRL &trans &trans  &trans   &trans   &trans      &kp MINUS &kp EQUAL &kp LBKT        &kp RBKT &kp BSLH &kp GRAVE
-   &kp LSHFT &trans   &trans &trans   &trans   &trans      &kp UNDER &kp PLUS  &kp LBRC        &kp RBRC &kp PIPE &kp TILDE
-                    	     &kp LGUI &trans   &kp SPACE   &kp RET   &trans    &kp RALT
-                        >;
-                };
+        quick_mod_tap: quick_mod_tap {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "tap-preferred";
+            tapping-term-ms = <300>;
+            quick-tap-ms = <200>; // Allows quick interruption
+            bindings = <&kp>, <&kp>;
         };
+
+        // Custom double tap behavior for soft off
+
+        soft_off_tap: soft_off_tap {
+            compatible = "zmk,behavior-tap-dance";
+            #binding-cells = <0>;
+            tapping-term-ms = <300>;
+            bindings = <&none>, <&soft_off>;
+        };
+    };
+
+    combos {
+        compatible = "zmk,combos";
+
+        // Game layer activation
+
+        gameactivation {
+            bindings = <&to 4>;
+            key-positions = <25 10>;
+        };
+
+        // Soft off combo - press Q and P simultaneously
+
+        soft_off_combo {
+            bindings = <&soft_off_tap>;
+            key-positions = <10 21>; // Q and P keys
+        };
+    };
+
+    // Soft off configuration
+
+    soft_off {
+        compatible = "zmk,soft-off";
+        label = "SOFT_OFF";
+    };
+
+    keymap {
+        compatible = "zmk,keymap";
+
+        layer0 {
+            bindings = <
+&none  &kp Q                        &kp W                      &kp E                   &kp R                      &kp T            &kp Y        &kp U                  &kp I                   &kp O                       &kp P                                 &none
+&none  &quick_mod_tap LEFT_SHIFT A  &quick_mod_tap LEFT_ALT S  &quick_mod_tap RCTRL D  &quick_mod_tap LEFT_WIN F  &kp G            &kp H        &quick_mod_tap RWIN J  &quick_mod_tap RCTRL K  &quick_mod_tap RIGHT_ALT L  &quick_mod_tap RIGHT_SHIFT SEMICOLON  &none
+&none  &kp Z                        &kp X                      &kp C                   &kp V                      &kp B            &kp N        &kp M                  &kp COMMA               &kp DOT                     &kp SLASH                             &none
+                                                               &lt 1 ESCAPE            &kp SPACE                  &kp BACKSPACE    &lt 3 ENTER  &lt 2 TAB              &kp DELETE
+            >;
+        };
+
+        layer_1 {
+            bindings = <
+&none  &none           &none         &none             &none         &none    &kp PRINTSCREEN  &kp F7  &kp F8  &kp F9  &kp F12  &none
+&none  &kp LEFT_SHIFT  &kp LEFT_ALT  &kp LEFT_CONTROL  &kp LEFT_WIN  &none    &kp SCROLLLOCK   &kp F4  &kp F5  &kp F6  &kp F11  &none
+&none  &none           &none         &none             &none         &none    &kp PAUSE_BREAK  &kp F1  &kp F2  &kp F3  &kp F10  &none
+                                     &trans            &none         &none    &none            &none   &none
+            >;
+
+            label = "f layer";
+        };
+
+        layer_2 {
+            bindings = <
+&none  &kp LEFT_BRACKET  &kp N7  &kp N8   &kp N9     &kp RBKT     &none  &none          &none      &none          &none            &none
+&none  &kp SQT           &kp N4  &kp N5   &kp N6     &kp EQUAL    &none  &kp RIGHT_WIN  &kp RCTRL  &kp RIGHT_ALT  &kp RIGHT_SHIFT  &none
+&none  &kp DOT           &kp N1  &kp N2   &kp N3     &kp BSLH     &none  &none          &none      &none          &none            &none
+                                 &kp DOT  &kp MINUS  &kp N0       &none  &trans         &none
+            >;
+
+            label = "numbers";
+        };
+
+        layer_3 {
+            bindings = <
+&none  &kp LS(LBRC)   &kp LS(AMPS)  &kp LS(STAR)   &kp LS(LPAR)   &kp LS(RBRC)    &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &none       &none
+&none  &kp LS(COLON)  &kp LS(DLLR)  &kp LS(PRCNT)  &kp LS(CARET)  &kp LS(PLUS)    &none         &none         &none         &none         &none       &none
+&none  &kp LS(TILDE)  &kp LS(EXCL)  &kp LS(AT)     &kp LS(POUND)  &kp LS(PIPE)    &none         &none         &none         &none         &bt BT_CLR  &none
+                                    &kp LS(LPAR)   &kp LS(UNDER)  &kp LS(RPAR)    &trans        &none         &none
+            >;
+
+            label = "symbols";
+        };
+
+        layer_4 {
+            bindings = <
+&none  &kp Q           &kp TAB         &none     &kp E      &none    &none    &none  &none  &none  &to 0      &none
+&none  &kp SPACE       &kp LEFT_ARROW  &kp DOWN  &kp RIGHT  &kp F    &kp X    &none  &none  &none  &none      &none
+&none  &kp LEFT_SHIFT  &none           &none     &none      &none    &none    &none  &none  &none  &kp SLASH  &none
+                                       &kp ESC   &kp UP     &none    &kp RET  &none  &none
+            >;
+
+            label = "game";
+        };
+    };
 };
